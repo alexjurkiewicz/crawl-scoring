@@ -1,0 +1,68 @@
+plugins:
+  - serverless-python-requirements
+
+service: crawl-scoring
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: ap-southeast-2
+  endpointType: regional
+  memorySize: 192
+  environment:
+    DYNAMO_GAMES_TABLE: ${self:service}-game
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMO_GAMES_TABLE}
+
+# you can add packaging information here
+package:
+ include:
+   - handler.py
+   - crawl_scoring/**
+ exclude:
+   - "**"
+
+functions:
+  test:
+    handler: handler.test
+    events:
+      - http:
+          path: test
+          method: get
+      - http:
+          path: hello
+          method: post
+  add_game:
+    handler: handler.add_game
+    events:
+      - http:
+          path: game
+          method: post
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    TableGames:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: start
+            AttributeType: N
+        KeySchema:
+          - AttributeName: start
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMO_GAMES_TABLE}
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
