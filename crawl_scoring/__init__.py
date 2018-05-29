@@ -8,14 +8,12 @@ def test(event, context):
         "input": event,
     }
 
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
+    response = {"statusCode": 200, "body": json.dumps(body)}
 
     return response
 
 
 def add_game(*args):
     from . import game
+
     return game.add_game(*args)

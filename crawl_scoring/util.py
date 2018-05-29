@@ -1,5 +1,6 @@
 import json
 
+
 def error(message, code=500):
     print("Error: %s" % message)
     return response(message, code)
